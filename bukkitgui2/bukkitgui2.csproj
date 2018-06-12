@@ -128,15 +128,6 @@
     <Compile Include="AddOn\Console\EmulatorInput.Designer.cs">
       <DependentUpon>EmulatorInput.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddOn\Forwarder\PortMappingEntry.cs" />
-    <Compile Include="AddOn\Forwarder\Upnp.cs" />
-    <Compile Include="AddOn\Issues\Issues.cs" />
-    <Compile Include="AddOn\Issues\IssuesTab.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Issues\IssuesTab.Designer.cs">
-      <DependentUpon>IssuesTab.cs</DependentUpon>
-    </Compile>
     <Compile Include="AddOn\Editor\BanListControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -175,38 +166,6 @@
     </Compile>
     <Compile Include="AddOn\IAddon.cs" />
     <Compile Include="AddOn\IAddonTab.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\api3\BukgetPlugin.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\api3\BukgetPluginInstaller.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\api3\BukgetUrlBuilder.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\api3\JsonParser.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\BukgetPluginsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Plugins\Bukget\BukgetPluginsControl.Designer.cs">
-      <DependentUpon>BukgetPluginsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddOn\Plugins\Bukget\api3\BukgetPluginVersion.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\api3\Bukget.cs" />
-    <Compile Include="AddOn\Plugins\Bukget\BukgetPluginView.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AddOn\Plugins\Bukget\BukgetPluginView.Designer.cs">
-      <DependentUpon>BukgetPluginView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddOn\Plugins\InstalledPlugins\InstalledPlugin.cs" />
-    <Compile Include="AddOn\Plugins\InstalledPlugins\InstalledPluginManager.cs" />
-    <Compile Include="AddOn\Plugins\InstalledPlugins\InstalledPluginsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Plugins\InstalledPlugins\InstalledPluginsControl.Designer.cs">
-      <DependentUpon>InstalledPluginsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddOn\Plugins\InstalledPlugins\PluginUpdater.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AddOn\Plugins\InstalledPlugins\PluginUpdater.Designer.cs">
-      <DependentUpon>PluginUpdater.cs</DependentUpon>
-    </Compile>
     <Compile Include="AddOn\Settings\VariousSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -270,13 +229,6 @@
     <Compile Include="AddOn\Tasker\Trigger\CurrentTimeTrigger.cs" />
     <Compile Include="AddOn\Tasker\Trigger\ITrigger.cs" />
     <Compile Include="AddOn\Tasker\Trigger\ServerUptimeTrigger.cs" />
-    <Compile Include="AddOn\Updater\Updater.cs" />
-    <Compile Include="AddOn\Updater\UpdaterSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Updater\UpdaterSettings.Designer.cs">
-      <DependentUpon>UpdaterSettings.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ColorPicker\ColorPicker.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -316,26 +268,12 @@
     <Compile Include="AddOn\Editor\EditorTab.Designer.cs">
       <DependentUpon>EditorTab.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddOn\Forwarder\Forwarder.cs" />
-    <Compile Include="AddOn\Forwarder\ForwarderTab.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Forwarder\ForwarderTab.Designer.cs">
-      <DependentUpon>ForwarderTab.cs</DependentUpon>
-    </Compile>
     <Compile Include="AddOn\PlayerList\PlayerList.cs" />
     <Compile Include="AddOn\PlayerList\PlayerListTab.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="AddOn\PlayerList\PlayerListTab.Designer.cs">
       <DependentUpon>PlayerListTab.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddOn\Plugins\Plugins.cs" />
-    <Compile Include="AddOn\Plugins\PluginsTab.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Plugins\PluginsTab.Designer.cs">
-      <DependentUpon>PluginsTab.cs</DependentUpon>
     </Compile>
     <Compile Include="AddOn\Settings\Settings.cs" />
     <Compile Include="AddOn\Settings\SettingsTab.cs">
@@ -420,14 +358,11 @@
     <Compile Include="MinecraftInterop\ServerConfig\ServerProperties.cs" />
     <Compile Include="MinecraftServers\IMinecraftServer.cs" />
     <Compile Include="MinecraftInterop\PlayerHandler\MinecraftGameMode.cs" />
-    <Compile Include="MinecraftServers\Servers\BukkitServer.cs" />
     <Compile Include="MinecraftServers\MinecraftServerBase.cs" />
     <Compile Include="MinecraftServers\MinecraftServerLoader.cs" />
-    <Compile Include="MinecraftServers\Servers\GlowstoneServer.cs" />
     <Compile Include="MinecraftServers\Servers\JsonApi2Server.cs" />
     <Compile Include="MinecraftServers\Servers\JsonApiServer.cs" />
     <Compile Include="MinecraftServers\Servers\McpcServer.cs" />
-    <Compile Include="MinecraftServers\Servers\SpigotServer.cs" />
     <Compile Include="MinecraftServers\Servers\VanillaServer.cs" />
     <Compile Include="MinecraftServers\Tools\JsonApi2CredentialsSettingsControl.cs">
       <SubType>UserControl</SubType>
@@ -484,9 +419,6 @@
     <EmbeddedResource Include="AddOn\Console\EmulatorInput.resx">
       <DependentUpon>EmulatorInput.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Issues\IssuesTab.resx">
-      <DependentUpon>IssuesTab.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="AddOn\Editor\BanListControl.resx">
       <DependentUpon>BanListControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -508,26 +440,8 @@
     <EmbeddedResource Include="AddOn\Editor\SettingsEditDialog.resx">
       <DependentUpon>SettingsEditDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Forwarder\ForwarderTab.resx">
-      <DependentUpon>ForwarderTab.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="AddOn\PlayerList\PlayerListTab.resx">
       <DependentUpon>PlayerListTab.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Plugins\Bukget\BukgetPluginsControl.resx">
-      <DependentUpon>BukgetPluginsControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Plugins\Bukget\BukgetPluginView.resx">
-      <DependentUpon>BukgetPluginView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Plugins\InstalledPlugins\InstalledPluginsControl.resx">
-      <DependentUpon>InstalledPluginsControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Plugins\InstalledPlugins\PluginUpdater.resx">
-      <DependentUpon>PluginUpdater.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Plugins\PluginsTab.resx">
-      <DependentUpon>PluginsTab.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AddOn\Settings\VariousSettings.resx">
       <DependentUpon>VariousSettings.cs</DependentUpon>
@@ -552,9 +466,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AddOn\Tasker\TaskerUI\TaskEditor.resx">
       <DependentUpon>TaskEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Updater\UpdaterSettings.resx">
-      <DependentUpon>UpdaterSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ColorPicker\ColorPicker.resx">
       <DependentUpon>ColorPicker.cs</DependentUpon>
@@ -595,7 +506,6 @@
       <DependentUpon>SplashScreen.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Compile Include="MinecraftServers\Tools\Bukkit\dlb.cs" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

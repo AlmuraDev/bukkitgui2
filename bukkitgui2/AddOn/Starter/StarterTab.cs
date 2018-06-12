@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
@@ -20,7 +19,6 @@ using Net.Bertware.Bukkitgui2.Core;
 using Net.Bertware.Bukkitgui2.Core.Configuration;
 using Net.Bertware.Bukkitgui2.Core.Logging;
 using Net.Bertware.Bukkitgui2.Core.Util.Performance;
-using Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler;
 using Net.Bertware.Bukkitgui2.MinecraftServers;
 using Net.Bertware.Bukkitgui2.UI;
 
@@ -166,21 +164,11 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		private void LoadServer()
 		{
 			GBServer.UseWaitCursor = true;
-			GBMaintainance.UseWaitCursor = true;
 
 			IMinecraftServer server = GetSelectedServer();
 			if (server == null) return;
 
 			Logger.Log(LogLevel.Info, "StarterTab", "Loading server: " + server.Name);
-
-			PBServerLogo.Image = server.Logo;
-			LLblSite.Text = "Site: " + server.Site;
-
-			// Enable buttons as needed
-			BtnDownloadRec.Enabled = server.CanDownloadRecommendedVersion;
-			BtnDownloadBeta.Enabled = server.CanDownloadBetaVersion;
-			BtnDownloadDev.Enabled = server.CanDownloadDevVersion;
-			btnGetCurrentBuild.Enabled = server.CanGetCurrentVersion;
 
 			// If this server doesn't use a custom assembly, use the java settings
 			CBJavaVersion.Enabled = !server.HasCustomAssembly;
@@ -191,81 +179,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 			TxtOptArg.Enabled = !server.HasCustomAssembly;
 			TxtOptFlag.Enabled = !server.HasCustomAssembly;
 			TxtJarFile.Enabled = !server.HasCustomAssembly;
-
-			//Enable possible update settings
-			//Notify needs getting the current and the latest version
-			Boolean notifyRb = server.CanGetCurrentVersion && server.CanFetchRecommendedVersion;
-
-			Boolean notifyBeta = server.CanGetCurrentVersion && server.CanFetchBetaVersion;
-
-			Boolean notifyDev = server.CanGetCurrentVersion && server.CanFetchDevVersion;
-
-			// Updating also needs the possibility to download
-			Boolean updateRb = notifyRb && server.CanDownloadRecommendedVersion;
-
-			Boolean updateBeta = notifyBeta && server.CanDownloadBetaVersion;
-
-			Boolean updateDev = notifyDev && server.CanDownloadDevVersion;
-
-			LblLatestDevValue.Text = "Not available";
-			if (server.CanFetchDevVersion) LblLatestDevValue.Text = server.FetchDevVersionUiString;
-			metroToolTip.SetToolTip(LblLatestDevValue, LblLatestDevValue.Text);
-
-			LblLatestBetaValue.Text = "Not available";
-			if (server.CanFetchBetaVersion) LblLatestBetaValue.Text = server.FetchBetaVersionUiString;
-			metroToolTip.SetToolTip(LblLatestBetaValue, LblLatestBetaValue.Text);
-
-			LblLatestRecommendedValue.Text = "Not available";
-			if (server.CanFetchRecommendedVersion)
-				LblLatestRecommendedValue.Text = server.FetchRecommendedVersionUiString;
-			metroToolTip.SetToolTip(LblLatestRecommendedValue, LblLatestRecommendedValue.Text);
-
-			CBUpdateBehaviour.Items.Clear();
-			CBUpdateBehaviour.Items.Add("Don't check for updates");
-			//
-			// DO NOT TRANSLATE BELOW
-			// 
-
-			if (notifyRb || notifyBeta || notifyDev)
-			{
-				CBUpdateBehaviour.Items.Add("Check for updates and notify me");
-			}
-			if (updateRb || updateBeta || updateDev)
-			{
-				CBUpdateBehaviour.Items.Add("Check for updates and auto update");
-			}
-
-			//
-			// DO NOT TRANSLATE ABOVE
-			// 
-			int updatebehaviour = Config.ReadInt("starter", "updatebehaviour", 0);
-			CBUpdateBehaviour.SelectedIndex = 0;
-			if (CBUpdateBehaviour.Items.Count > updatebehaviour) CBUpdateBehaviour.SelectedIndex = updatebehaviour;
-			CBUpdateBranch.Items.Clear();
-
-			//
-			// DO NOT TRANSLATE BELOW
-			// 
-
-			if (notifyRb)
-			{
-				CBUpdateBranch.Items.Add("Recommended builds");
-			}
-			if (notifyBeta)
-			{
-				CBUpdateBranch.Items.Add("Beta builds");
-			}
-			if (notifyDev)
-			{
-				CBUpdateBranch.Items.Add("Development builds");
-			}
-
-			//
-			// DO NOT TRANSLATE ABOVE
-			// 
-			int updatebranch = Config.ReadInt("starter", "updatebranch", 0);
-			if (CBUpdateBranch.Items.Count > 0) CBUpdateBranch.SelectedIndex = 0;
-			if (CBUpdateBranch.Items.Count > updatebranch) CBUpdateBranch.SelectedIndex = updatebranch;
 
 			// If there is a custom settings control, load it
 			if (server.HasCustomSettingsControl)
@@ -282,7 +195,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 			}
 
 			GBServer.UseWaitCursor = false;
-			GBMaintainance.UseWaitCursor = false;
 			Logger.Log(LogLevel.Info, "StarterTab", "Loaded server: " + server.Name);
 		}
 
@@ -365,14 +277,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 					Logger.Log(LogLevel.Severe, "StarterTab", "Failed to start server", "No starter object found");
 					return;
 				}
-
-				// Auto update
-				if (CBUpdateBehaviour.SelectedIndex > 0)
-				{
-					CheckAutoUpdate();
-				}
-
-
+                
 				if (!server.HasCustomAssembly)
 				{
 					starter.LaunchServer(
@@ -389,88 +294,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				{
 					starter.LaunchServer(server, _customControl);
 				}
-			}
-		}
-
-		private void CheckAutoUpdate()
-		{
-			try
-			{
-				if (InvokeRequired)
-				{
-					Invoke((MethodInvoker) (CheckAutoUpdate));
-				}
-				else
-				{
-					if (CBUpdateBehaviour.SelectedIndex < 1) return;
-					if (CBUpdateBranch.SelectedItem == null ||
-					    string.IsNullOrEmpty(CBUpdateBranch.SelectedItem.ToString()))
-						return;
-
-					ProcessHandler.SetStatusStarting(); // already show that the server is starting
-					ConsoleTab.WriteOut("__________________________________________________________________");
-					ConsoleTab.WriteOut("Performing version check... Branch: " + CBUpdateBranch.SelectedItem);
-
-					IMinecraftServer server = GetSelectedServer();
-					string currentversion = server.GetCurrentVersion(TxtJarFile.Text);
-					ConsoleTab.WriteOut("Performing version check... Current version: " + currentversion);
-
-					string latestversion = "";
-
-					if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("recommended"))
-						latestversion = server.FetchRecommendedVersion;
-					if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("beta"))
-						latestversion = server.FetchBetaVersion;
-					if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("dev"))
-						latestversion = server.FetchDevVersion;
-					ConsoleTab.WriteOut("Performing version check... Latest version: " + latestversion);
-
-					switch (CBUpdateBehaviour.SelectedIndex)
-					{
-						case 1: // Notify
-
-							if (int.Parse(latestversion) > int.Parse(currentversion))
-							{
-								ConsoleTab.WriteOut("A new server version is available for " + server.Name);
-								ConsoleTab.WriteOut(
-									"Download the latest version in the starter tab. The latest version is #" +
-									latestversion);
-
-								Thread t = new Thread(() =>
-									MetroMessageBox.Show(FindForm(),
-										"A new server version is available for " + server.Name + "." +
-										Environment.NewLine +
-										"Download the latest version in the starter tab. The latest version is #" +
-										latestversion,
-										"Server update available",
-										MessageBoxButtons.OK, MessageBoxIcon.Information)
-									);
-								t.Start();
-							}
-							break;
-						case 2: // Auto update
-							if (int.Parse(latestversion) > int.Parse(currentversion))
-							{
-								ConsoleTab.WriteOut("New server version available: #" + latestversion +
-								                    ". This version will be installed automaticly. You can disable this in the starter tab.");
-								if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("recommended"))
-									server.DownloadRecommendedVersion(TxtJarFile.Text);
-								if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("beta"))
-									server.DownloadBetaVersion(TxtJarFile.Text);
-								if (CBUpdateBranch.SelectedItem.ToString().ToLower().Contains("dev"))
-									server.DownloadDevVersion(TxtJarFile.Text);
-								ConsoleTab.WriteOut("New server version installed.");
-							}
-							break;
-					}
-					ConsoleTab.WriteOut("Finished update check. Starting server...");
-					ConsoleTab.WriteOut("__________________________________________________________________");
-				}
-			}
-			catch (Exception exception)
-			{
-				Logger.Log(LogLevel.Severe, "StarterTab",
-					"Failed to complete auto-update check for " + GetSelectedServer(), exception.Message);
 			}
 		}
 
@@ -614,7 +437,12 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				TBMinRam.Value = Convert.ToInt32(NumMinRam.Value);
 			}
 
-			if (!_ready)
+		    if (TBMinRam.Value > TBMaxRam.Value)
+		    {
+		        TBMaxRam.Value = TBMinRam.Value;
+		    }
+
+            if (!_ready)
 			{
 				return; //if not initialized, don't detect changes
 			}
@@ -640,7 +468,12 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				TBMaxRam.Value = Convert.ToInt32(NumMaxRam.Value);
 			}
 
-			if (!_ready)
+		    if (TBMaxRam.Value < TBMinRam.Value)
+		    {
+		        TBMinRam.Value = TBMaxRam.Value;
+		    }
+
+            if (!_ready)
 			{
 				return; //if not initialized, don't detect changes
 			}
@@ -730,39 +563,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 			Config.WriteInt("Starter", "JavaVersion", CBJavaVersion.SelectedIndex);
 		}
 
-		private void BtnDownloadRec_Click(object sender, EventArgs e)
-		{
-			if (TxtJarFile.Text == "")
-			{
-				TxtJarFile.Text = Share.AssemblyLocation + GetSelectedServer().Name.ToLower() + ".jar";
-				// set GUI location as server folder
-			}
-			GetSelectedServer().DownloadRecommendedVersion(TxtJarFile.Text);
-			ValidateInput();
-		}
-
-		private void BtnDownloadBeta_Click(object sender, EventArgs e)
-		{
-			if (TxtJarFile.Text == "")
-			{
-				TxtJarFile.Text = Share.AssemblyLocation + GetSelectedServer().Name.ToLower() + "-beta.jar";
-				// set GUI location as server folder
-			}
-			GetSelectedServer().DownloadBetaVersion(TxtJarFile.Text);
-			ValidateInput();
-		}
-
-		private void BtnDownloadDev_Click(object sender, EventArgs e)
-		{
-			if (TxtJarFile.Text == "")
-			{
-				TxtJarFile.Text = Share.AssemblyLocation + GetSelectedServer().Name.ToLower() + "-dev.jar";
-				// set GUI location as server folder
-			}
-			GetSelectedServer().DownloadDevVersion(TxtJarFile.Text);
-			ValidateInput();
-		}
-
 		/// <summary>
 		///     Get the path of the selected java instance
 		/// </summary>
@@ -789,23 +589,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		{
 			if (GBCustomSettings.Controls.Count < 1) return null;
 			return GBCustomSettings.Controls[0];
-		}
-
-		private void btnGetCurrentBuild_Click(object sender, EventArgs e)
-		{
-			if (!GetSelectedServer().CanGetCurrentVersion) return;
-			LblCurrentVer.Text = "Version: " + GetSelectedServer().GetCurrentVersionUiString(GetSelectedServerPath());
-			metroToolTip.SetToolTip(LblCurrentVer, LblCurrentVer.Text);
-		}
-
-		private void CBUpdateBehaviour_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			Config.WriteInt("starter", "updatebehaviour", CBUpdateBehaviour.SelectedIndex);
-		}
-
-		private void CBUpdateBranch_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			Config.WriteInt("starter", "updatebranch", CBUpdateBehaviour.SelectedIndex);
 		}
 	}
 }
