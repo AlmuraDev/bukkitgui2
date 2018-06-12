@@ -92,20 +92,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddOn\AddonManager.cs" />
-    <Compile Include="AddOn\Backup\Backup.cs" />
-    <Compile Include="AddOn\Backup\BackupDefenition.cs" />
-    <Compile Include="AddOn\Backup\BackupDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AddOn\Backup\BackupDialog.designer.cs">
-      <DependentUpon>BackupDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddOn\Backup\BackupTab.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="AddOn\Backup\BackupTab.Designer.cs">
-      <DependentUpon>BackupTab.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ConsoleInput\AutoCompletionMenu.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -179,7 +165,6 @@
       <DependentUpon>Credits.cs</DependentUpon>
     </Compile>
     <Compile Include="AddOn\Starter\JavaApi.cs" />
-    <Compile Include="AddOn\Tasker\Action\BackupAction.cs" />
     <Compile Include="AddOn\Tasker\Action\ConsoleCommandAction.cs" />
     <Compile Include="AddOn\Tasker\Action\ConsoleClearAction.cs" />
     <Compile Include="AddOn\Tasker\Action\ExitGuiAction.cs" />
@@ -404,12 +389,6 @@
     <Compile Include="UI\SplashScreen.Designer.cs">
       <DependentUpon>SplashScreen.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="AddOn\Backup\BackupDialog.resx">
-      <DependentUpon>BackupDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddOn\Backup\BackupTab.resx">
-      <DependentUpon>BackupTab.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="AddOn\Console\ConsoleSettings.resx">
       <DependentUpon>ConsoleSettings.cs</DependentUpon>
     </EmbeddedResource>
