@@ -78,7 +78,9 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 		/// </summary>
 		public const string RG_STACKTRACE = "(at |java\\.)(\\w+\\.){1,}(\\w|\\d|<){1,}(\\(|:|\\.|<|>)";
 
-		public MinecraftServerBase()
+        public const string RG_CLASS = "(\\[.*?\\])";
+
+        public MinecraftServerBase()
 		{
 			Name = "Default server";
 			Site = "http://minecraft.net";
@@ -185,7 +187,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_PLAYER + RG_IP_BRACKET + " logged in with entity id",
+				RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + RG_IP_BRACKET + " logged in with entity id",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerJoin;
@@ -196,7 +198,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			//[INFO]  Bertware left the game.
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_PLAYER + " lost connection:",
+                RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + " lost connection:",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerLeave;
@@ -204,7 +206,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			// catch player left the game message
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_PLAYER + " left the game",
+                RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + " left the game",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerLeave;
@@ -219,7 +221,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			// [command sender]: Kicked player [player]. With reason: [newline] [Reason]
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_PLAYER + " lost connection: Kicked by",
+                RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + " lost connection: Kicked by",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerKick;
@@ -230,7 +232,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			//[INFO]  CONSOLE: Banned player bertware
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_PLAYER + " lost connection: Banned by",
+                RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + " lost connection: Banned by",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerBan;
@@ -299,7 +301,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			//[INFO]  UUID of player Bertware is f0b27a3369394b25ab897aa4e4db83c1
 			//[INFO]  Bertware[/127.0.0.1:51815] logged in with entity id 184 at ([world] 98.5, 64.0, 230.5)
 			PlayerActionJoin join = new PlayerActionJoin();
-			text = Regex.Replace(text, RG_INFO, "", RegexOptions.IgnoreCase);
+			text = Regex.Replace(text, RG_INFO + RG_SPACE + RG_CLASS, "", RegexOptions.IgnoreCase);
 			join.PlayerName = Regex.Match(text, "^\\s?(" + RG_PLAYER +")").Groups[1].Value;
 			join.Ip = Regex.Match(text, RG_IP_NOPORT).Value;
 
