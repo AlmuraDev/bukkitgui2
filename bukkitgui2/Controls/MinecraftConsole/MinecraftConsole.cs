@@ -205,5 +205,5 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 		{
 			if (e.KeyCode == Keys.C && e.Control) CopySelectedText(sender, e);
 		}
-	}
+    }
 }

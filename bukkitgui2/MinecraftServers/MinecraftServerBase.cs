@@ -237,7 +237,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			{
 				return MessageType.PlayerBan;
 			}
-			
+
 			if (Regex.IsMatch(text, RG_INFO + RG_SPACE + "There are " + "\\d+" + "/" + "\\d+" + " players online:",
 				RegexOptions.IgnoreCase))
 			{
@@ -276,7 +276,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			if (string.IsNullOrEmpty(text)) return text;
 			// fix harmless warning, users question this warning.
 			if (text.Contains("org.fusesource.jansi.WindowsAnsiOutputStream")) return "";
-	
+
 			if (text.Equals(">")) return "";
 
 			// filter color codes
@@ -350,74 +350,6 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 		public virtual PlayerActionIpBan ParsePlayerActionIpBan(string text)
 		{
 			return new PlayerActionIpBan();
-		}
-
-		public bool CanFetchRecommendedVersion { get; protected set; }
-
-		public bool CanFetchBetaVersion { get; protected set; }
-		public bool CanFetchDevVersion { get; protected set; }
-
-		public bool CanDownloadRecommendedVersion { get; protected set; }
-
-		public bool CanDownloadBetaVersion { get; protected set; }
-		public bool CanDownloadDevVersion { get; protected set; }
-		public bool CanGetCurrentVersion { get; protected set; }
-
-		public virtual string FetchRecommendedVersion { get; protected set; }
-
-		public virtual string FetchBetaVersion { get; protected set; }
-
-		public virtual string FetchDevVersion { get; protected set; }
-
-		public virtual string FetchRecommendedVersionUiString
-		{
-			get { return FetchRecommendedVersion; }
-		}
-
-		public virtual string FetchBetaVersionUiString
-		{
-			get { return FetchBetaVersion; }
-		}
-
-		public virtual string FetchDevVersionUiString
-		{
-			get { return FetchDevVersion; }
-		}
-
-
-		public virtual bool DownloadRecommendedVersion(string targetfile)
-		{
-			return false;
-		}
-
-		public virtual bool DownloadBetaVersion(string targetfile)
-		{
-			return false;
-		}
-
-		public virtual bool DownloadDevVersion(string targetfile)
-		{
-			return false;
-		}
-
-
-		public virtual MinecraftServerVersion GetCurrentVersionObject(string file)
-		{
-			return null;
-		}
-
-		public virtual string GetCurrentVersion(string file)
-		{
-			MinecraftServerVersion version = GetCurrentVersionObject(file);
-			if (version == null) return "Unknown";
-			return version.Build.ToString(CultureInfo.InvariantCulture);
-		}
-
-		public virtual string GetCurrentVersionUiString(string file)
-		{
-			MinecraftServerVersion version = GetCurrentVersionObject(file);
-			if (version == null) return "Unknown";
-			return "#" + version.Build + " (" + version.ServerVersion + ")";
 		}
 	}
 }

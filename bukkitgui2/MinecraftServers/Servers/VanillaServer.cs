@@ -23,37 +23,6 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers.Servers
 			Name = "Vanilla";
 			Site = "http://minecraft.net";
 			Logo = Resources.vanilla_logo;
-
-			CanDownloadRecommendedVersion = true;
-			CanDownloadDevVersion = true;
-			CanFetchDevVersion = true;
-			CanFetchRecommendedVersion = true;
-			//default value for boolean is false, so all other features are disabled by default
-		}
-
-		public override string FetchDevVersion
-		{
-			get { return VanillaDownloadProvider.GetLatestVersion(); }
-		}
-
-		public override string FetchRecommendedVersion
-		{
-			get { return VanillaDownloadProvider.GetLatestRecommendedVersion(); }
-		}
-
-
-		public override bool DownloadRecommendedVersion(string targetfile)
-		{
-			WebUtil.DownloadFile(VanillaDownloadProvider.GetLatestRecommendedVersionUrl(), targetfile, true, true);
-
-			return true;
-		}
-
-		public override bool DownloadDevVersion(string targetfile)
-		{
-			WebUtil.DownloadFile(VanillaDownloadProvider.GetLatestUrl(), targetfile, true, true);
-
-			return true;
 		}
 
 		public override string GetLaunchFlags(string defaultFlags = "")
