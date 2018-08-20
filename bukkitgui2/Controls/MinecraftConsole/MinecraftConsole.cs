@@ -153,6 +153,12 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 				SelectionStart = TextLength;
 				SelectionColor = messageColor;
 				SelectedText = text + '\r' + '\n';
+
+			    if (Lines.Length > 10000)
+			    {
+                    Clear();
+			    }
+
 				if (Autoscroll) Scrolldown();
 			}
 		}

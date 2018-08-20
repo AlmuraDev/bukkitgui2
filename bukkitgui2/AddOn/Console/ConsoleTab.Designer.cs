@@ -50,6 +50,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.quickButtons = new Net.Bertware.Bukkitgui2.Controls.QuickButtons.QuickButtons();
             this.metroStyleExtender = new MetroFramework.Components.MetroStyleExtender(this.components);
+            this.cbAutoScroll = new Net.Bertware.Bukkitgui2.Controls.SettingsCheckbox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -70,7 +71,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.groupBox1.Controls.Add(this.splitContainer1);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(794, 371);
+            this.groupBox1.Size = new System.Drawing.Size(794, 370);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Server management";
@@ -89,7 +90,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             // 
             this.splitContainer1.Panel2.Controls.Add(this.CIConsoleInput);
             this.splitContainer1.Panel2.Controls.Add(this.MCCOut);
-            this.splitContainer1.Size = new System.Drawing.Size(788, 352);
+            this.splitContainer1.Size = new System.Drawing.Size(788, 351);
             this.splitContainer1.SplitterDistance = 160;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -104,7 +105,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.SlvPlayers.LargeImageList = this.imgListPlayerFaces;
             this.SlvPlayers.Location = new System.Drawing.Point(0, 0);
             this.SlvPlayers.Name = "SlvPlayers";
-            this.SlvPlayers.Size = new System.Drawing.Size(160, 352);
+            this.SlvPlayers.Size = new System.Drawing.Size(160, 351);
             this.SlvPlayers.SmallImageList = this.imgListPlayerFaces;
             this.SlvPlayers.TabIndex = 0;
             this.SlvPlayers.UseCompatibleStateImageBehavior = false;
@@ -178,7 +179,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.CIConsoleInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CIConsoleInput.Lines = new string[0];
-            this.CIConsoleInput.Location = new System.Drawing.Point(0, 332);
+            this.CIConsoleInput.Location = new System.Drawing.Point(0, 331);
             this.CIConsoleInput.MaxLength = 32767;
             this.CIConsoleInput.Name = "CIConsoleInput";
             this.CIConsoleInput.PasswordChar = '\0';
@@ -209,7 +210,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.MCCOut.Name = "MCCOut";
             this.MCCOut.ShowDate = false;
             this.MCCOut.ShowTime = true;
-            this.MCCOut.Size = new System.Drawing.Size(624, 326);
+            this.MCCOut.Size = new System.Drawing.Size(624, 325);
             this.MCCOut.TabIndex = 0;
             this.MCCOut.Text = "";
             this.MCCOut.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConsoleTab_KeyDown);
@@ -221,9 +222,9 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.metroStyleExtender.SetApplyMetroTheme(this.groupBox2, true);
             this.groupBox2.BackColor = System.Drawing.Color.Transparent;
             this.groupBox2.Controls.Add(this.performanceMonitor);
-            this.groupBox2.Location = new System.Drawing.Point(170, 380);
+            this.groupBox2.Location = new System.Drawing.Point(170, 379);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(624, 117);
+            this.groupBox2.Size = new System.Drawing.Size(624, 130);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Performance";
@@ -234,7 +235,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.performanceMonitor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performanceMonitor.Location = new System.Drawing.Point(3, 16);
             this.performanceMonitor.Name = "performanceMonitor";
-            this.performanceMonitor.Size = new System.Drawing.Size(618, 98);
+            this.performanceMonitor.Size = new System.Drawing.Size(618, 111);
             this.performanceMonitor.TabIndex = 0;
             this.performanceMonitor.UseSelectable = true;
             // 
@@ -243,10 +244,11 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.metroStyleExtender.SetApplyMetroTheme(this.groupBox3, true);
             this.groupBox3.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox3.Controls.Add(this.cbAutoScroll);
             this.groupBox3.Controls.Add(this.quickButtons);
-            this.groupBox3.Location = new System.Drawing.Point(7, 380);
+            this.groupBox3.Location = new System.Drawing.Point(7, 376);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(157, 117);
+            this.groupBox3.Size = new System.Drawing.Size(157, 133);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Quick Actions";
@@ -256,9 +258,20 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.quickButtons.Dock = System.Windows.Forms.DockStyle.Fill;
             this.quickButtons.Location = new System.Drawing.Point(3, 16);
             this.quickButtons.Name = "quickButtons";
-            this.quickButtons.Size = new System.Drawing.Size(151, 98);
+            this.quickButtons.Size = new System.Drawing.Size(151, 114);
             this.quickButtons.TabIndex = 0;
             this.quickButtons.UseSelectable = true;
+            // 
+            // cbAutoScroll
+            // 
+            this.cbAutoScroll.AutoSize = true;
+            this.cbAutoScroll.Location = new System.Drawing.Point(6, 112);
+            this.cbAutoScroll.Name = "cbAutoScroll";
+            this.cbAutoScroll.Size = new System.Drawing.Size(78, 15);
+            this.cbAutoScroll.TabIndex = 6;
+            this.cbAutoScroll.Text = "AutoScroll";
+            this.cbAutoScroll.UseSelectable = true;
+            this.cbAutoScroll.CheckedChanged += new System.EventHandler(this.cbAutoScroll_CheckedChanged);
             // 
             // ConsoleTab
             // 
@@ -267,7 +280,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "ConsoleTab";
-            this.Size = new System.Drawing.Size(800, 500);
+            this.Size = new System.Drawing.Size(800, 512);
             this.groupBox1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -276,6 +289,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.ContextPlayers.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -300,7 +314,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
 		private System.Windows.Forms.ToolStripMenuItem ContextPlayersOp;
 		private System.Windows.Forms.ToolStripMenuItem ContextPlayersDeOp;
 		private System.Windows.Forms.ImageList imgListPlayerFaces;
-
-
-     }
+        private Controls.SettingsCheckbox cbAutoScroll;
+    }
 }

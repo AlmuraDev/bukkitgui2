@@ -51,6 +51,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
 			imgListPlayerFaces.Images.Add("default", Resources.player_face);
 
 			MCCOut.Autoscroll = Config.ReadBool("console", "autoscroll", true);
+		    cbAutoScroll.Checked = MCCOut.Autoscroll;
 
 			CIConsoleInput.AddAutocompleteSource(PlayerHandler.GetOnlinePlayerNames);
 			CIConsoleInput.AddAutocompleteSource(GetKnownCommands);
@@ -282,5 +283,11 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
 		{
 			ContextPlayers.Enabled = (SlvPlayers.SelectedItems.Count > 0);
 		}
-	}
+
+        private void cbAutoScroll_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.WriteBool("console", "autoscroll", cbAutoScroll.Checked);
+            MCCOut.Autoscroll = cbAutoScroll.Checked;
+        }
+    }
 }
