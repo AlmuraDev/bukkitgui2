@@ -48,9 +48,9 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.performanceMonitor = new Net.Bertware.Bukkitgui2.Controls.PerformanceMonitor.PerformanceMonitor();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.cbAutoScroll = new Net.Bertware.Bukkitgui2.Controls.SettingsCheckbox();
             this.quickButtons = new Net.Bertware.Bukkitgui2.Controls.QuickButtons.QuickButtons();
             this.metroStyleExtender = new MetroFramework.Components.MetroStyleExtender(this.components);
-            this.cbAutoScroll = new Net.Bertware.Bukkitgui2.Controls.SettingsCheckbox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -253,15 +253,6 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Quick Actions";
             // 
-            // quickButtons
-            // 
-            this.quickButtons.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.quickButtons.Location = new System.Drawing.Point(3, 16);
-            this.quickButtons.Name = "quickButtons";
-            this.quickButtons.Size = new System.Drawing.Size(151, 114);
-            this.quickButtons.TabIndex = 0;
-            this.quickButtons.UseSelectable = true;
-            // 
             // cbAutoScroll
             // 
             this.cbAutoScroll.AutoSize = true;
@@ -272,6 +263,14 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Console
             this.cbAutoScroll.Text = "AutoScroll";
             this.cbAutoScroll.UseSelectable = true;
             this.cbAutoScroll.CheckedChanged += new System.EventHandler(this.cbAutoScroll_CheckedChanged);
+            // 
+            // quickButtons
+            // 
+            this.quickButtons.Location = new System.Drawing.Point(3, 16);
+            this.quickButtons.Name = "quickButtons";
+            this.quickButtons.Size = new System.Drawing.Size(151, 90);
+            this.quickButtons.TabIndex = 0;
+            this.quickButtons.UseSelectable = true;
             // 
             // ConsoleTab
             // 

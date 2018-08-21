@@ -103,6 +103,16 @@ namespace Net.Bertware.Bukkitgui2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap hourglass {
+            get {
+                object obj = ResourceManager.GetObject("hourglass", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icon_cancel_64 {
             get {
                 object obj = ResourceManager.GetObject("icon_cancel_64", resourceCulture);
@@ -373,6 +383,16 @@ namespace Net.Bertware.Bukkitgui2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap kill {
+            get {
+                object obj = ResourceManager.GetObject("kill", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap mcpc_cauldron_logo {
             get {
                 object obj = ResourceManager.GetObject("mcpc_cauldron_logo", resourceCulture);
@@ -421,6 +441,16 @@ namespace Net.Bertware.Bukkitgui2.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap restart {
+            get {
+                object obj = ResourceManager.GetObject("restart", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
         /// </summary>
         internal static System.IO.UnmanagedMemoryStream sound_connect {
@@ -462,6 +492,26 @@ namespace Net.Bertware.Bukkitgui2.Properties {
         internal static System.Drawing.Bitmap spigot_logo {
             get {
                 object obj = ResourceManager.GetObject("spigot_logo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap start {
+            get {
+                object obj = ResourceManager.GetObject("start", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap stop {
+            get {
+                object obj = ResourceManager.GetObject("stop", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

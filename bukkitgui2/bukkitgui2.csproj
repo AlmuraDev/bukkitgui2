@@ -502,9 +502,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bukkitgui-icon.ico" />
+    <None Include="Resources\stop.png" />
+    <None Include="Resources\start.png" />
     <EmbeddedResource Include="Resources\Dll\Interop.NATUPNPLib.dll" />
     <Content Include="bukkitgui-icon32.ico" />
     <Content Include="Resources\Dll\Net.Bertware.Get.xml" />
+    <None Include="Resources\hourglass.png" />
     <Content Include="Resources\Icon\icon_cancel-64.png" />
     <Content Include="Resources\Icon\icon_chat-64.png" />
     <Content Include="Resources\Icon\icon_checkmark-64.png" />
@@ -535,6 +538,8 @@
     <Content Include="Resources\Img\jsonapi_logo.png" />
     <Content Include="Resources\Img\mcpc_cauldron_logo.png" />
     <None Include="Resources\JsonApiConnector.pdb" />
+    <None Include="Resources\kill.png" />
+    <None Include="Resources\restart.png" />
     <Content Include="Resources\Sound\sound_connect.wav" />
     <Content Include="Resources\Sound\sound_disconnect.wav" />
     <Content Include="Resources\Sound\sound_severe.wav" />

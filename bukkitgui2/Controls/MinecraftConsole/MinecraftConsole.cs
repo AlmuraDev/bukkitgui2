@@ -83,7 +83,6 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 			MessageColorSevere = Color.DarkRed;
 			MessageColorWarning = Color.DarkOrange;
 
-			Autoscroll = true;
 			CreateContextMenu();
 
 
@@ -126,12 +125,6 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
             if (link.StartsWith("http")) Process.Start(e.LinkText);
         }
 
-		public void ScrollDown()
-		{
-			Select(TextLength, 0);
-			ScrollToCaret();
-		}
-
 		/// <summary>
 		///     Writes text to the Console Control
 		/// </summary>
@@ -150,9 +143,8 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 
 				text = AddTimeStamp(text);
 
-				SelectionStart = TextLength;
-				SelectionColor = messageColor;
-				SelectedText = text + '\r' + '\n';
+			    SelectionColor = messageColor;
+                AppendText(text + Environment.NewLine);
 
 			    if (Lines.Length > 10000)
 			    {
@@ -187,27 +179,18 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 
 		private void CreateContextMenu()
 		{
-			MenuItem[] menuItem = new MenuItem[2];
-			menuItem[0] = new MenuItem("Autoscroll", ToggleAutoScroll) {Checked = Autoscroll, Enabled = true};
-			menuItem[1] = new MenuItem("Copy", CopySelectedText) {Enabled = true};
-			ContextMenu cm = new ContextMenu(menuItem);
-			ContextMenu = cm;
-		}
+			var menuItem = new MenuItem[1];
+			menuItem[0] = new MenuItem("Copy", CopySelectedText) {Enabled = true};
+			ContextMenu = new ContextMenu(menuItem);
+        }
 
-		private void ToggleAutoScroll(object sender, EventArgs e)
-		{
-			Autoscroll = !Autoscroll;
-			ContextMenu.MenuItems[0].Checked = Autoscroll;
-		}
+	    private void CopySelectedText(object sender, EventArgs e)
+	    {
+	        if (string.IsNullOrEmpty(SelectedText)) return;
+	        Clipboard.SetText(SelectedText);
+	    }
 
-		private void CopySelectedText(object sender, EventArgs e)
-		{
-		    if (string.IsNullOrEmpty(SelectedText)) return;
-			Clipboard.SetText(SelectedText);
-		}
-
-
-		private void MinecraftConsole_KeyUp(object sender, KeyEventArgs e)
+	    private void MinecraftConsole_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (e.KeyCode == Keys.C && e.Control) CopySelectedText(sender, e);
 		}

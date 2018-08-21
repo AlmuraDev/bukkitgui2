@@ -11,7 +11,6 @@ using System;
 using System.Windows.Forms;
 using MetroFramework.Controls;
 using Net.Bertware.Bukkitgui2.AddOn.Starter;
-using Net.Bertware.Bukkitgui2.Core;
 using Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler;
 
 namespace Net.Bertware.Bukkitgui2.Controls.QuickButtons
@@ -21,6 +20,8 @@ namespace Net.Bertware.Bukkitgui2.Controls.QuickButtons
 		public QuickButtons()
 		{
 			InitializeComponent();
+            new ToolTip().SetToolTip(btnKill, "Kills the server instance");
+            new ToolTip().SetToolTip(btnRestart, "Restarts the server");
 			ProcessHandler.ServerStatusChanged += HandleServerStatusChange;
 		}
 
@@ -28,8 +29,8 @@ namespace Net.Bertware.Bukkitgui2.Controls.QuickButtons
 
 		protected virtual void OnTaskButtonPressed()
 		{
-			EventHandler handler = TaskButtonPressed;
-			if (handler != null) handler(this, EventArgs.Empty);
+			var handler = TaskButtonPressed;
+		    handler?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void HandleServerStatusChange(ServerState currentState)
@@ -41,50 +42,38 @@ namespace Net.Bertware.Bukkitgui2.Controls.QuickButtons
 			}
 			else
 			{
-				switch (currentState)
+			    var tooltip = new ToolTip();
+                switch (currentState)
 				{
 					case ServerState.Starting:
-						btnStartStop.Enabled = false;
+						btnStart.Enabled = false;
 						btnRestart.Enabled = false;
-						btnStartStop.Text = Locale.Tr("Starting...");
+					    btnKill.Enabled = true;
+					    btnStart.Image = Properties.Resources.hourglass;
 
-						break;
+                        break;
 					case ServerState.Running:
-
-						if (ProcessHandler.Server.IsLocal)
-						{
-							btnStartStop.Text = Locale.Tr("Stop");
-							metroToolTip.SetToolTip(btnStartStop, "Stop the server");
-						}
-						else
-						{
-							metroToolTip.SetToolTip(btnStartStop, "Disconnect from the server");
-							btnStartStop.Text = Locale.Tr("Disconnect");
-						}
-
-						btnStartStop.Enabled = true;
+					    tooltip.SetToolTip(btnStart, ProcessHandler.Server.IsLocal ? "Stop the server" : "Disconnect from the server");
+					    btnStart.Enabled = true;
+					    btnStart.Image = Properties.Resources.stop;
+                        btnKill.Enabled = true;
 						btnRestart.Enabled = true;
-						btnStartStop.Text = Locale.Tr("Stop");
+
 						break;
 					case ServerState.Stopping:
-						btnStartStop.Enabled = false;
+						btnStart.Enabled = false;
 						btnRestart.Enabled = false;
-						btnStartStop.Text = Locale.Tr("Stopping...");
+					    btnKill.Enabled = true;
+					    btnStart.Image = Properties.Resources.hourglass;
 
 						break;
 					case ServerState.Stopped:
-						btnStartStop.Enabled = true;
-						btnRestart.Enabled = false;
-						if (ProcessHandler.Server.IsLocal)
-						{
-							btnStartStop.Text = Locale.Tr("Start");
-							metroToolTip.SetToolTip(btnStartStop, "Start the server");
-						}
-						else
-						{
-							btnStartStop.Text = Locale.Tr("Connect");
-							metroToolTip.SetToolTip(btnStartStop, "Connect to the server");
-						}
+					    tooltip.SetToolTip(btnStart, ProcessHandler.Server.IsLocal ? "Start the server" : "Connect to the server");
+                        btnStart.Enabled = true;
+					    btnStart.Image = Properties.Resources.start;
+                        btnRestart.Enabled = false;
+					    btnKill.Enabled = false;
+
 						break;
 				}
 			}
@@ -126,5 +115,18 @@ namespace Net.Bertware.Bukkitgui2.Controls.QuickButtons
 		{
 			Starter.RestartServer(); //TODO: Fix restart for jsonapi
 		}
-	}
+
+        private void btnKill_Click(object sender, EventArgs e)
+        {
+            var result =
+                MessageBox.Show(
+                    "Are you sure you want to kill the server instance? This could lead to data corruption among other issues.",
+                    "", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
+
+            if (result == DialogResult.Yes)
+            {
+                ProcessHandler.KillServer();
+            }
+        }
+    }
 }
