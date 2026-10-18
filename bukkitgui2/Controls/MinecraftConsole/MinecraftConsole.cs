@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Net.Bertware.Bukkitgui2.MinecraftInterop.OutputHandler;
 
@@ -73,9 +74,34 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 
 		private readonly Dictionary<MessageType, Color> _colorCache;
 
+		/// <summary>
+		///     Lines waiting to be written by the flush timer
+		/// </summary>
+		private readonly List<KeyValuePair<MessageType, string>> _pendingOutput =
+			new List<KeyValuePair<MessageType, string>>();
+
+		private readonly Timer _flushTimer;
+
+		private const int MaxLines = 10000;
+
+		private const int WmSetredraw = 0x000B;
+
+		private const int EmGetscrollpos = 0x04DD;
+
+		private const int EmSetscrollpos = 0x04DE;
+
+		[DllImport("user32.dll")]
+		private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, ref Point lParam);
+
 		public MinecraftConsole()
 		{
-			
+			_flushTimer = new Timer {Interval = 100};
+			_flushTimer.Tick += FlushTimer_Tick;
+			_flushTimer.Start();
+
 			KeyUp += MinecraftConsole_KeyUp;
             LinkClicked += MinecraftConsole_LinkClicked;
 			MessageColorInfo = Color.Blue;
@@ -132,27 +158,74 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 		/// <param name="text"> The message text. </param>
 		public void WriteOutput(MessageType type, string text)
 		{
-			//suport for calls from other threads
-			if (InvokeRequired)
+			// Queue the line; the flush timer writes queued lines in batches on the UI thread,
+			// so callers on other threads never wait for the UI.
+			text = AddTimeStamp(text);
+			lock (_pendingOutput)
 			{
-				Invoke((MethodInvoker) (() => WriteOutput(type, text)));
+				_pendingOutput.Add(new KeyValuePair<MessageType, string>(type, text));
 			}
-			else
+		}
+
+		private void FlushTimer_Tick(object sender, EventArgs e)
+		{
+			List<KeyValuePair<MessageType, string>> lines;
+			lock (_pendingOutput)
 			{
-				Color messageColor = _colorCache[type];
-
-				text = AddTimeStamp(text);
-
-			    SelectionColor = messageColor;
-                AppendText(text + Environment.NewLine);
-
-			    if (Lines.Length > 10000)
-			    {
-                    Clear();
-			    }
-
-				if (Autoscroll) Scrolldown();
+				if (_pendingOutput.Count == 0) return;
+				lines = new List<KeyValuePair<MessageType, string>>(_pendingOutput);
+				_pendingOutput.Clear();
 			}
+
+			// Appending moves the caret to the end, and the box scrolls to follow the caret.
+			// Without autoscroll, remember where the user was so we can put the view and selection back.
+			bool keepView = !Autoscroll;
+			int selectionStart = SelectionStart;
+			int selectionLength = SelectionLength;
+			Point scrollPos = Point.Empty;
+			if (keepView) SendMessage(Handle, EmGetscrollpos, IntPtr.Zero, ref scrollPos);
+
+			// Don't redraw for every line in the batch
+			SendMessage(Handle, WmSetredraw, IntPtr.Zero, IntPtr.Zero);
+			try
+			{
+				foreach (KeyValuePair<MessageType, string> line in lines)
+				{
+					SelectionStart = TextLength;
+					SelectionLength = 0;
+					SelectionColor = _colorCache[line.Key];
+					AppendText(line.Value + Environment.NewLine);
+				}
+
+				// GetLineFromCharIndex is a single window message, Lines.Length copies the whole text
+				bool cleared = false;
+				if (GetLineFromCharIndex(TextLength) > MaxLines)
+				{
+					Clear();
+					cleared = true;
+				}
+
+				if (!keepView)
+				{
+					Scrolldown();
+				}
+				else if (!cleared)
+				{
+					Select(selectionStart, selectionLength);
+					SendMessage(Handle, EmSetscrollpos, IntPtr.Zero, ref scrollPos);
+				}
+			}
+			finally
+			{
+				SendMessage(Handle, WmSetredraw, new IntPtr(1), IntPtr.Zero);
+				Invalidate();
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing) _flushTimer.Dispose();
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
