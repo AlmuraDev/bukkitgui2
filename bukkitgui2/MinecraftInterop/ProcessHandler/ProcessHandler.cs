@@ -8,6 +8,8 @@
 // ©Bertware, visit http://bertware.net
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -238,6 +240,16 @@ namespace Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler
 		private static Thread _thdReadStdErr;
 
 		/// <summary>
+		///     Thread that hands queued output to the output handler, so slow handlers (the UI) never block the readers
+		/// </summary>
+		private static Thread _thdDispatchOutput;
+
+		/// <summary>
+		///     Output lines waiting to be handled. Value is true for standard error lines.
+		/// </summary>
+		private static BlockingCollection<KeyValuePair<string, bool>> _outputQueue;
+
+		/// <summary>
 		///     Start a process, start the threads to read the output and send the output to the correct outputhandler
 		/// </summary>
 		/// <param name="executable">The executable to run</param>
@@ -344,9 +356,49 @@ namespace Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler
 			_thdReadStdOut.SetApartmentState(ApartmentState.MTA);
 			_thdReadStdErr = new Thread(ReadStdErr) {IsBackground = true, Name = "_thdReadStdErr"};
 			_thdReadStdErr.SetApartmentState(ApartmentState.MTA);
+			_outputQueue = new BlockingCollection<KeyValuePair<string, bool>>();
+			_thdDispatchOutput = new Thread(DispatchOutput) {IsBackground = true, Name = "_thdDispatchOutput"};
 			_runThreads = true;
+			_thdDispatchOutput.Start(_outputQueue);
 			_thdReadStdOut.Start();
 			_thdReadStdErr.Start();
+		}
+
+		/// <summary>
+		///     Hand queued output to the output handler, until the queue is completed. Call this method async!
+		/// </summary>
+		private static void DispatchOutput(object queue)
+		{
+			foreach (KeyValuePair<string, bool> line in
+				((BlockingCollection<KeyValuePair<string, bool>>) queue).GetConsumingEnumerable())
+			{
+				try
+				{
+					if (line.Value) RaiseErrorOutputReceived(line.Key);
+					MinecraftOutputHandler.HandleOutput(Server, line.Key, line.Value);
+				}
+				catch (Exception exception)
+				{
+					Logger.Log(LogLevel.Warning, "ProcessHandler", "Couldn't handle output: " + line.Key, exception.Message);
+				}
+			}
+		}
+
+		/// <summary>
+		///     Queue a line of output for the dispatcher thread. Never waits for output handlers.
+		/// </summary>
+		private static void EnqueueOutput(string output, bool isError)
+		{
+			BlockingCollection<KeyValuePair<string, bool>> queue = _outputQueue;
+			if (queue == null || queue.IsAddingCompleted) return;
+			try
+			{
+				queue.Add(new KeyValuePair<string, bool>(output, isError));
+			}
+			catch (InvalidOperationException)
+			{
+				// queue was completed between the check and the add; the server is stopping
+			}
 		}
 
 		/// <summary>
@@ -364,7 +416,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler
 						if (string.IsNullOrEmpty(output)) continue;
 
 						Logger.Log(LogLevel.Debug, "LocalProcessHandler", "StdOut output: " + output);
-						MinecraftOutputHandler.HandleOutput(Server, output);
+						EnqueueOutput(output, false);
 					}
 
 					//This should be false if we're stopping the server, so this is strange
@@ -398,8 +450,7 @@ namespace Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler
 						if (string.IsNullOrEmpty(output)) continue;
 
 						Logger.Log(LogLevel.Debug, "LocalProcessHandler", "StdErr output: " + output);
-						RaiseErrorOutputReceived(output);
-						MinecraftOutputHandler.HandleOutput(Server, output, true);
+						EnqueueOutput(output, true);
 					}
 				}
 			}
@@ -421,6 +472,8 @@ namespace Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler
 		internal static void StopOutputReading()
 		{
 			_runThreads = false;
+			// lets the dispatcher finish the lines already queued, then exit
+			if (_outputQueue != null) _outputQueue.CompleteAdding();
 		}
 
 		/// <summary>

@@ -17,6 +17,16 @@ namespace Net.Bertware.Bukkitgui2.Core.Logging
 		private static List<LogEntry> _entries;
 
 		/// <summary>
+		///     Guards _entries. Log() is called from the UI thread and the server output threads at the same time.
+		/// </summary>
+		private static readonly object EntriesLock = new object();
+
+		/// <summary>
+		///     Serializes writes to the log file
+		/// </summary>
+		private static readonly object FileLock = new object();
+
+		/// <summary>
 		///     Indicates wether this component is initialized and can be used
 		/// </summary>
 		public static bool IsInitialized { get; private set; }
@@ -26,8 +36,8 @@ namespace Net.Bertware.Bukkitgui2.Core.Logging
 		/// </summary>
 		internal static void Initialize()
 		{
-			IsInitialized = true;
 			_entries = new List<LogEntry>();
+			IsInitialized = true;
 			Application.ApplicationExit += ((sender, e) => Dispose());
 			AppDomain.CurrentDomain.UnhandledException += ((sender, e) => WriteUnhandledError(e));
 		}
@@ -54,19 +64,16 @@ namespace Net.Bertware.Bukkitgui2.Core.Logging
 			Debug.WriteLine(entry.ToString());
 
 			//if initialized, also log to file
-			if (IsInitialized)
-			{
-				try
-				{
-					_entries.Add(entry);
-				}
-				catch (Exception ignored)
-				{
-					// ignored
-				}
+			if (!IsInitialized) return;
 
-				if (_entries.Count > 512) SaveFile();
+			bool full;
+			lock (EntriesLock)
+			{
+				_entries.Add(entry);
+				full = _entries.Count > 512;
 			}
+
+			if (full) SaveFile();
 		}
 
 		/// <summary>
@@ -85,46 +92,59 @@ namespace Net.Bertware.Bukkitgui2.Core.Logging
 		/// <param name="savelocation">The location to save the log file. If empty default location will be used</param>
 		internal static void SaveFile(string savelocation)
 		{
-			try
+			Exception failure = null;
+			lock (FileLock)
 			{
-				IsInitialized = false; // Temporary block new entries while we're writing the log file
-				StreamWriter sw;
-				if (_hasAlreadySaved)
+				// Take the pending entries and start a new list, so other threads can keep logging while we write.
+				// Taking them inside FileLock keeps entries in order in the file.
+				List<LogEntry> entries;
+				lock (EntriesLock)
 				{
-					// There is already a file of this session. Check if the maximum size is exceeded
-					if (new FileInfo(savelocation).Length > 16*1024*1024) // max 16mb
+					if (_entries == null || _entries.Count == 0) return;
+					entries = _entries;
+					_entries = new List<LogEntry>();
+				}
+
+				try
+				{
+					StreamWriter sw;
+					if (_hasAlreadySaved)
 					{
-						// replace files over max size
-						sw = File.CreateText(savelocation);
+						// There is already a file of this session. Check if the maximum size is exceeded
+						if (new FileInfo(savelocation).Length > 16*1024*1024) // max 16mb
+						{
+							// replace files over max size
+							sw = File.CreateText(savelocation);
+						}
+						else
+						{
+							// append files smaller than max size
+							sw = File.AppendText(savelocation);
+						}
 					}
 					else
 					{
-						// append files smaller than max size
-						sw = File.AppendText(savelocation);
+						// Create new file
+						sw = File.CreateText(savelocation);
 					}
-				}
-				else
-				{
-					// Create new file
-					sw = File.CreateText(savelocation);
-				}
 
-				foreach (LogEntry entry in _entries)
-				{
-					sw.WriteLine(entry.ToString());
+					using (sw)
+					{
+						foreach (LogEntry entry in entries)
+						{
+							sw.WriteLine(entry.ToString());
+						}
+					}
+					_hasAlreadySaved = true;
 				}
+				catch (Exception e)
+				{
+					failure = e;
+				}
+			}
 
-				sw.Close();
-				_hasAlreadySaved = true;
-				_entries = new List<LogEntry>();
-				
-			}
-			catch (Exception e)
-			{
-				IsInitialized = true; // enable logging again
-				Logger.Log(LogLevel.Severe, "Logger","Failed to save file!", e.Message);
-			}
-			IsInitialized = true; // enable logging again
+			// Logged outside the file lock; the entries were already taken, so this can't loop back into a failing save
+			if (failure != null) Log(LogLevel.Severe, "Logger", "Failed to save file!", failure.Message);
 		}
 
 		private static string TimeStamp()

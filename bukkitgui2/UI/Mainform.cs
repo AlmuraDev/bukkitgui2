@@ -222,15 +222,29 @@ namespace Net.Bertware.Bukkitgui2.UI
 		/// <param name="result">Result of the parse operation</param>
 		private void HandleOutput(string text, OutputParseResult result)
 		{
-			//suport for calls from other threads
-			if (InvokeRequired)
+			// Only the latest line is shown, so keep the newest one and post at most one update at a time.
+			// This never waits for the UI, so heavy output can't stall the output thread.
+			_latestOutputMessage = result.Message;
+			if (Interlocked.Exchange(ref _outputLabelUpdatePending, 1) == 1) return;
+			try
 			{
-				Invoke((MethodInvoker) (() => HandleOutput(text, result)));
+				BeginInvoke((MethodInvoker) UpdateOutputLabel);
 			}
-			else
+			catch (InvalidOperationException)
 			{
-				LblToolsMainServerOutput.Text = result.Message;
+				// form handle not created yet or already destroyed
+				_outputLabelUpdatePending = 0;
 			}
+		}
+
+		private volatile string _latestOutputMessage;
+
+		private int _outputLabelUpdatePending;
+
+		private void UpdateOutputLabel()
+		{
+			Interlocked.Exchange(ref _outputLabelUpdatePending, 0);
+			LblToolsMainServerOutput.Text = _latestOutputMessage;
 		}
 
 		/// <summary>

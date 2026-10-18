@@ -9,6 +9,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
 using MetroFramework.Controls;
@@ -48,31 +49,68 @@ namespace Net.Bertware.Bukkitgui2.Controls.PerformanceMonitor
 			if (_tmrRefresh != null) _tmrRefresh.Enabled = Visible; //Do not refresh if invisible
 		}
 
+		/// <summary>
+		///     1 while a refresh is running, so slow refreshes don't pile up
+		/// </summary>
+		private int _refreshing;
+
 		private void RefreshData(object sender, ElapsedEventArgs e)
 		{
-			if (InvokeRequired)
+			if (Interlocked.Exchange(ref _refreshing, 1) == 1) return;
+			try
 			{
-				Invoke(new MethodInvoker(() => RefreshData(sender, e)));
-			}
-			else
-			{
-				ProgBarGuiRam.Value = PerformanceMonitorDataSource.GuiRamCounter.MemoryUsagePct;
-				LblGuiRamUsageValue.Text = ConstructRamLabelText(PerformanceMonitorDataSource.GuiRamCounter);
-				ProgBarTotalRam.Value = PerformanceMonitorDataSource.TotalRamCounter.MemoryUsagePct;
-				LblTotalRamUsageValue.Text = ConstructRamLabelText(PerformanceMonitorDataSource.TotalRamCounter);
-				ProgBarServerRam.Value = PerformanceMonitorDataSource.ServerRamCounter.MemoryUsagePct;
-				LblServerRamUsageValue.Text = ConstructRamLabelText(PerformanceMonitorDataSource.ServerRamCounter);
-				ProgBarGuiCpu.Value = PerformanceMonitorDataSource.GuiCpuCounter.CpuUsage;
-				lblGuiCpuUsageValue.Text = ConstructCpuLabelText(PerformanceMonitorDataSource.GuiCpuCounter);
-				ProgBarTotalCpu.Value = PerformanceMonitorDataSource.TotalCpuCounter.CpuUsage;
-				lblTotalCpuUsageValue.Text = ConstructCpuLabelText(PerformanceMonitorDataSource.TotalCpuCounter);
-				ProgBarServerCpu.Value = PerformanceMonitorDataSource.ServerCpuCounter.CpuUsage;
-				lblServerCpuUsageValue.Text = ConstructCpuLabelText(PerformanceMonitorDataSource.ServerCpuCounter);
+				// Read the counters here, on the timer thread. The first access creates the performance counters
+				// and runs a WMI query, which takes seconds; doing that on the UI thread froze the window at startup.
+				MemoryCounter guiRam = PerformanceMonitorDataSource.GuiRamCounter;
+				MemoryCounter totalRam = PerformanceMonitorDataSource.TotalRamCounter;
+				MemoryCounter serverRam = PerformanceMonitorDataSource.ServerRamCounter;
+				CpuCounter guiCpu = PerformanceMonitorDataSource.GuiCpuCounter;
+				CpuCounter totalCpu = PerformanceMonitorDataSource.TotalCpuCounter;
+				CpuCounter serverCpu = PerformanceMonitorDataSource.ServerCpuCounter;
+
+				int guiRamPct = guiRam.MemoryUsagePct;
+				string guiRamText = ConstructRamLabelText(guiRam);
+				int totalRamPct = totalRam.MemoryUsagePct;
+				string totalRamText = ConstructRamLabelText(totalRam);
+				int serverRamPct = serverRam.MemoryUsagePct;
+				string serverRamText = ConstructRamLabelText(serverRam);
+				int guiCpuPct = guiCpu.CpuUsage;
+				string guiCpuText = ConstructCpuLabelText(guiCpu);
+				int totalCpuPct = totalCpu.CpuUsage;
+				string totalCpuText = ConstructCpuLabelText(totalCpu);
+				int serverCpuPct = serverCpu.CpuUsage;
+				string serverCpuText = ConstructCpuLabelText(serverCpu);
 
 				TimeSpan uptime = ProcessHandler.Uptime;
-				LblUptimeValue.Text = uptime.Hours.ToString().PadLeft(2, '0') + ":" +
-				                      uptime.Minutes.ToString().PadLeft(2, '0') + ":" +
-				                      uptime.Seconds.ToString().PadLeft(2, '0');
+				string uptimeText = uptime.Hours.ToString().PadLeft(2, '0') + ":" +
+				                    uptime.Minutes.ToString().PadLeft(2, '0') + ":" +
+				                    uptime.Seconds.ToString().PadLeft(2, '0');
+
+				if (!IsHandleCreated || IsDisposed) return;
+				BeginInvoke(new MethodInvoker(() =>
+				{
+					ProgBarGuiRam.Value = guiRamPct;
+					LblGuiRamUsageValue.Text = guiRamText;
+					ProgBarTotalRam.Value = totalRamPct;
+					LblTotalRamUsageValue.Text = totalRamText;
+					ProgBarServerRam.Value = serverRamPct;
+					LblServerRamUsageValue.Text = serverRamText;
+					ProgBarGuiCpu.Value = guiCpuPct;
+					lblGuiCpuUsageValue.Text = guiCpuText;
+					ProgBarTotalCpu.Value = totalCpuPct;
+					lblTotalCpuUsageValue.Text = totalCpuText;
+					ProgBarServerCpu.Value = serverCpuPct;
+					lblServerCpuUsageValue.Text = serverCpuText;
+					LblUptimeValue.Text = uptimeText;
+				}));
+			}
+			catch (InvalidOperationException)
+			{
+				// control was disposed while we were reading the counters
+			}
+			finally
+			{
+				Interlocked.Exchange(ref _refreshing, 0);
 			}
 		}
 
