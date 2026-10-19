@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MetroFramework;
@@ -115,39 +116,23 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 
 			// Add options for installed java versions
 			CBJavaVersion.Items.Clear();
-			if (JavaApi.IsInstalled(JavaVersion.Jre6X32))
+			foreach (JavaInstallation installation in JavaApi.Installations)
 			{
-				CBJavaVersion.Items.Add("Java 6 - 32 bit");
-			}
-			if (JavaApi.IsInstalled(JavaVersion.Jre6X64))
-			{
-				CBJavaVersion.Items.Add("Java 6 - 64 bit");
-			}
-			if (JavaApi.IsInstalled(JavaVersion.Jre7X32))
-			{
-				CBJavaVersion.Items.Add("Java 7 - 32 bit");
-			}
-			if (JavaApi.IsInstalled(JavaVersion.Jre7X64))
-			{
-				CBJavaVersion.Items.Add("Java 7 - 64 bit");
-			}
-			if (JavaApi.IsInstalled(JavaVersion.Jre8X32))
-			{
-				CBJavaVersion.Items.Add("Java 8 - 32 bit");
-			}
-			if (JavaApi.IsInstalled(JavaVersion.Jre8X64))
-			{
-				CBJavaVersion.Items.Add("Java 8 - 64 bit");
+				CBJavaVersion.Items.Add(installation);
 			}
 
-			int javaType = Config.ReadInt("Starter", "JavaVersion", 0);
-			if (javaType < CBJavaVersion.Items.Count)
+			// The selection is saved as the path to java.exe, so it survives installs being added or removed
+			JavaInstallation savedJava = JavaApi.GetInstallation(Config.ReadString("Starter", "JavaPath", ""));
+			if (savedJava != null)
 			{
-				CBJavaVersion.SelectedIndex = javaType;
+				CBJavaVersion.SelectedItem = savedJava;
 			}
 			else
 			{
-				if (CBJavaVersion.Items.Count > 0) CBJavaVersion.SelectedIndex = 0;
+				// Nothing saved yet: prefer 64 bit java 8, which most modded servers need, else the newest
+				JavaInstallation preferred = JavaApi.Installations.FirstOrDefault(i => i.Version == 8 && i.Is64Bit) ??
+				                             JavaApi.Installations.FirstOrDefault();
+				if (preferred != null) CBJavaVersion.SelectedItem = preferred;
 			}
 
 			TxtJarFile.Text = Config.ReadString("Starter", "JarFile", "");
@@ -210,39 +195,12 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		}
 
 		/// <summary>
-		///     Get the selected java version
+		///     Get the selected java installation
 		/// </summary>
-		/// <returns>The selected java version as enum</returns>
-		public JavaVersion GetSelectedJavaVersion()
+		/// <returns>The selected java installation, or null if none is selected</returns>
+		public JavaInstallation GetSelectedJava()
 		{
-			if (CBJavaVersion.SelectedIndex < 0) return 0;
-
-			string selectedText = CBJavaVersion.SelectedItem.ToString();
-			if (Regex.IsMatch(selectedText, "(.*?)6(.*?)32"))
-			{
-				return JavaVersion.Jre6X32;
-			}
-			if (Regex.IsMatch(selectedText, "(.*?)6(.*?)64"))
-			{
-				return JavaVersion.Jre6X64;
-			}
-			if (Regex.IsMatch(selectedText, "(.*?)7(.*?)32"))
-			{
-				return JavaVersion.Jre7X32;
-			}
-			if (Regex.IsMatch(selectedText, "(.*?)7(.*?)64"))
-			{
-				return JavaVersion.Jre7X64;
-			}
-			if (Regex.IsMatch(selectedText, "(.*?)8(.*?)32"))
-			{
-				return JavaVersion.Jre8X32;
-			}
-			if (Regex.IsMatch(selectedText, "(.*?)8(.*?)64"))
-			{
-				return JavaVersion.Jre8X64;
-			}
-			return JavaVersion.Jre7X32;
+			return CBJavaVersion.SelectedItem as JavaInstallation;
 		}
 
 		/// <summary>
@@ -282,7 +240,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				{
 					starter.LaunchServer(
 						server,
-						GetSelectedJavaVersion(),
+						GetSelectedJavaPath(),
 						TxtJarFile.Text,
 						Convert.ToUInt32(NumMinRam.Value),
 						Convert.ToUInt32(NumMaxRam.Value),
@@ -330,7 +288,15 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				return false;
 			}
 
-			if (JavaApi.Is32Bitversion(GetSelectedJavaVersion()))
+			JavaInstallation selectedJava = GetSelectedJava();
+			if (selectedJava == null)
+			{
+				errorProvider.SetError(CBJavaVersion, "No java installation found. Install java (for example Eclipse Temurin 8).");
+				return false;
+			}
+			errorProvider.SetError(CBJavaVersion, "");
+
+			if (!selectedJava.Is64Bit)
 			{
 				if (NumMaxRam.Value > 1024)
 				{
@@ -560,7 +526,8 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 				return; //if not initialized, don't detect changes
 			}
 			ValidateInput();
-			Config.WriteInt("Starter", "JavaVersion", CBJavaVersion.SelectedIndex);
+			JavaInstallation selectedJava = GetSelectedJava();
+			if (selectedJava != null) Config.WriteString("Starter", "JavaPath", selectedJava.Path);
 		}
 
 		/// <summary>
@@ -569,7 +536,8 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		/// <returns></returns>
 		public string GetSelectedJavaPath()
 		{
-			return JavaApi.GetJavaPath(GetSelectedJavaVersion());
+			JavaInstallation selectedJava = GetSelectedJava();
+			return selectedJava == null ? null : selectedJava.Path;
 		}
 
 		/// <summary>
