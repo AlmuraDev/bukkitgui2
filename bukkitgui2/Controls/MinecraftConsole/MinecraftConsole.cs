@@ -102,7 +102,7 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 			_flushTimer.Tick += FlushTimer_Tick;
 			_flushTimer.Start();
 
-			KeyUp += MinecraftConsole_KeyUp;
+			KeyDown += MinecraftConsole_KeyDown;
             LinkClicked += MinecraftConsole_LinkClicked;
 			MessageColorInfo = Color.Blue;
 			MessageColorPlayerAction = Color.DarkGreen;
@@ -178,8 +178,9 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 			}
 
 			// Appending moves the caret to the end, and the box scrolls to follow the caret.
-			// Without autoscroll, remember where the user was so we can put the view and selection back.
-			bool keepView = !Autoscroll;
+			// Without autoscroll, or while the user has text selected (e.g. to copy it),
+			// remember where the user was so we can put the view and selection back.
+			bool keepView = !Autoscroll || SelectionLength > 0;
 			int selectionStart = SelectionStart;
 			int selectionLength = SelectionLength;
 			Point scrollPos = Point.Empty;
@@ -260,11 +261,20 @@ namespace Net.Bertware.Bukkitgui2.Controls.MinecraftConsole
 	    private void CopySelectedText(object sender, EventArgs e)
 	    {
 	        if (string.IsNullOrEmpty(SelectedText)) return;
-	        Clipboard.SetText(SelectedText);
+	        try
+	        {
+	            // retries for about a second if another program has the clipboard open
+	            Clipboard.SetDataObject(SelectedText, true, 10, 100);
+	        }
+	        catch (ExternalException)
+	        {
+	            // clipboard stayed busy; nothing more we can do
+	        }
 	    }
 
-	    private void MinecraftConsole_KeyUp(object sender, KeyEventArgs e)
+	    private void MinecraftConsole_KeyDown(object sender, KeyEventArgs e)
 		{
+			// Copy on key down: on key up, Ctrl is often already released, so the first Ctrl+C was missed
 			if (e.KeyCode == Keys.C && e.Control) CopySelectedText(sender, e);
 		}
     }

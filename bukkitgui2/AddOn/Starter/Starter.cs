@@ -13,6 +13,7 @@ using System.Linq;
 using System.Windows.Forms;
 using MetroFramework.Controls;
 using Net.Bertware.Bukkitgui2.Core.Configuration;
+using Net.Bertware.Bukkitgui2.Core.Logging;
 using Net.Bertware.Bukkitgui2.MinecraftInterop.ProcessHandler;
 using Net.Bertware.Bukkitgui2.MinecraftServers;
 
@@ -173,7 +174,7 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		///     Launch a new server
 		/// </summary>
 		/// <param name="server">the server type that will be executed</param>
-		/// <param name="javaVersion">the java version to use</param>
+		/// <param name="javaPath">the java.exe to run the server with</param>
 		/// <param name="jarFile">the jar file to run</param>
 		/// <param name="minMem">the minimum amount of memory to set</param>
 		/// <param name="maxMem">the maximum amount of memory to set</param>
@@ -183,16 +184,16 @@ namespace Net.Bertware.Bukkitgui2.AddOn.Starter
 		///     If this is an automated launch. Automated launches won't check for server updates and limit
 		///     popups.
 		/// </param>
-		public void LaunchServer(IMinecraftServer server, JavaVersion javaVersion, string jarFile, UInt32 minMem,
+		public void LaunchServer(IMinecraftServer server, string javaPath, string jarFile, UInt32 minMem,
 			UInt32 maxMem, string defaultParameters = "", string defaultFlags = "", Boolean automated = false)
 		{
 			server.PrepareLaunch();
 			string parameters = server.GetLaunchParameters(defaultParameters);
 			string flags = server.GetLaunchFlags(defaultFlags);
 			string argument = parameters + " -Xms" + minMem + "M -Xmx" + maxMem + "M -jar \"" + jarFile + "\" " + flags;
-			string executable = JavaApi.GetJavaPath(javaVersion);
+			Logger.Log(LogLevel.Info, "Starter", "Using java: " + javaPath);
 
-			ProcessHandler.StartServer(executable, argument, server);
+			ProcessHandler.StartServer(javaPath, argument, server);
 		}
 
 		/// <summary>
