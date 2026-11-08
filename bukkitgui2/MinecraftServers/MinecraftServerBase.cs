@@ -9,6 +9,7 @@
 
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Net.Bertware.Bukkitgui2.Core.Logging;
@@ -56,6 +57,11 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 		///     Ipv4 Ip with optional port, between right brackets
 		/// </summary>
 		public const string RG_IP_BRACKET = "\\[/" + RG_IP + "\\]";
+
+		/// <summary>
+		///     Any client address between brackets, as in a login message: [/1.2.3.4:5678], [/[2601:db8::1]:5678]
+		/// </summary>
+		public const string RG_ADDRESS_BRACKET = "\\[/([^\\]]|\\[[^\\]]*\\])+\\]";
 
 		/// <summary>
 		///     Player name
@@ -184,10 +190,12 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			//[INFO] Bertware[/127.0.0.1:58260] logged in with entity id 0 at (-1001.0479985318618, 2.0, 1409.300000011921)
 			//[INFO]  UUID of player Bertware is f0b27a3369394b25ab897aa4e4db83c1
 			//[INFO]  Bertware[/127.0.0.1:51815] logged in with entity id 184 at ([world] 98.5, 64.0, 230.5)
+			// Sponge puts a space before the address and the entity id between brackets:
+			//[INFO] [net.minecraft.server.management.PlayerList] Bertware [/127.0.0.1:63377] logged in with entity id [3144] in world (...)
 
 			if (Regex.IsMatch(
 				text,
-				RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + RG_IP_BRACKET + " logged in with entity id",
+				RG_INFO + RG_SPACE + RG_CLASS + RG_SPACE + RG_PLAYER + "\\s*" + RG_ADDRESS_BRACKET + " logged in with entity id",
 				RegexOptions.IgnoreCase))
 			{
 				return MessageType.PlayerJoin;
@@ -302,8 +310,23 @@ namespace Net.Bertware.Bukkitgui2.MinecraftServers
 			//[INFO]  Bertware[/127.0.0.1:51815] logged in with entity id 184 at ([world] 98.5, 64.0, 230.5)
 			PlayerActionJoin join = new PlayerActionJoin();
 			text = Regex.Replace(text, RG_INFO + RG_SPACE + RG_CLASS, "", RegexOptions.IgnoreCase);
-			join.PlayerName = Regex.Match(text, "^\\s?(" + RG_PLAYER +")").Groups[1].Value;
-			join.Ip = Regex.Match(text, RG_IP_NOPORT).Value;
+			join.PlayerName = Regex.Match(text, "^\\s*(" + RG_PLAYER +")").Groups[1].Value;
+
+			// Address without the port: [/1.2.3.4:5678] -> 1.2.3.4, [/[2601:db8::1]:5678] -> 2601:db8::1
+			string address = Regex.Match(text, "\\[/(.*?)\\]\\s*logged in").Groups[1].Value;
+			Match bracketedV6 = Regex.Match(address, "^\\[([^\\]]+)\\]");
+			if (bracketedV6.Success)
+			{
+				join.Ip = bracketedV6.Groups[1].Value;
+			}
+			else if (address.Count(c => c == ':') == 1)
+			{
+				join.Ip = address.Substring(0, address.IndexOf(':')); // ipv4:port
+			}
+			else
+			{
+				join.Ip = address; // ipv4 without port, or bare ipv6
+			}
 
 			return join;
 		}
